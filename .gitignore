@@ -1,0 +1,39 @@
+# Cartelle di build e file generati
+build/
+app/build/
+captures/
+bin/
+gen/
+out/
+
+# File di configurazione locale (NON includere mai il percorso del tuo SDK)
+local.properties
+.gradle/
+.navigation/
+.externalNativeBuild/
+.cxx/
+
+# File specifici di Android Studio / IntelliJ IDEA
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/gradle.xml
+.idea/assetWizardSettings.xml
+.idea/dictionaries/
+.idea/libraries/
+.idea/caches/
+.idea/modules.xml
+.idea/deploymentTargetDropDown.xml
+*.iml
+*.iws
+*.ipr
+
+# File di sistema e log
+*.log
+.DS_Store
+Thumbs.db
+
+# Keystore e file di firma (
+*.jks
+*.keystore
+*.pk8
+*.p12
