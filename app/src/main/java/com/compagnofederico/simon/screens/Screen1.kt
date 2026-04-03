@@ -11,62 +11,119 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.compagnofederico.simon.components.ColorData
+import com.compagnofederico.simon.R
 
 @Composable
 fun Screen1() {
     // Stato persistente alla rotazione
     val sequence = rememberSaveable { mutableStateListOf<String>() }
-
     // Layout portrait: colonna verticale
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.SpaceEvenly
     ){
         ColorGrid(
-            Modifier.weight(2f),
             onColorClick = {sequence.add(it)}
+        )
+
+        Display(
+            sequence = sequence
+        )
+
+        ButtonArea(
+            onClear = {sequence.clear()},
+            onEndGame = {}
         )
     }
 }
 
 @Composable
-fun ColorGrid(modifier: Modifier = Modifier, onColorClick: (String) -> Unit){
+private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
+    Box(
+        modifier = Modifier
+            .padding(4.dp)
+            .aspectRatio(0.95f)
+            .background(colorItem.color)
+            .clickable {
+                onClick(colorItem.letter)
+            }
+    )
+}
+
+@Composable
+private fun ColorGrid(onColorClick: (String) -> Unit){
     LazyVerticalGrid(
         // Fisso il numero di colonne
         columns = GridCells.Fixed(2),
-        modifier = modifier.fillMaxSize(),
         // La rendo non scrollabile
         userScrollEnabled = false
     ) {
         items(ColorData.entries) { colorItem ->
-            Box(
-                modifier = Modifier
-                    .padding(4.dp)
-                    .aspectRatio(0.75f)
-                    .background(colorItem.color)
-                    .clickable {
-                        onColorClick(colorItem.letter)
-                    }
+            ColorButton(
+                colorItem = colorItem,
+                onClick = onColorClick
             )
+        }
+    }
+}
+
+@Composable
+private fun Display(sequence: List<String>){
+    val textShown = sequence.joinToString(", ")
+    Surface(
+        modifier = Modifier.fillMaxWidth()
+            .height(75.dp),
+        color = Color(0xFFEEEEEE),
+        shape = MaterialTheme.shapes.medium
+    ){
+        Box(
+            modifier = Modifier
+                .padding(12.dp)
+                .verticalScroll(rememberScrollState())
+        ){
+            Text(
+                text = textShown
+            )
+        }
+    }
+}
+
+@Composable
+private fun ButtonArea(onClear: () -> Unit, onEndGame: () -> Unit){
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceAround
+    ){
+        Button(onClick = onClear){
+            Text(stringResource(R.string.button_clear))
+        }
+        Button(onClick = onEndGame){
+            Text(stringResource(R.string.button_end))
         }
     }
 }

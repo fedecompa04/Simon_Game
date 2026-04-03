@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Simon</string>
+    <string name="button_clear">Cancella</string>
+    <string name="button_end">Fine Partita</string>
 </resources>
