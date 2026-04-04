@@ -1,5 +1,6 @@
 package com.compagnofederico.simon.screens
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -23,11 +25,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,26 +44,62 @@ import com.compagnofederico.simon.R
 fun Screen1() {
     // Stato persistente alla rotazione
     val sequence = rememberSaveable { mutableStateListOf<String>() }
+    val orientation = LocalConfiguration.current
     // Layout portrait: colonna verticale
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly
-    ){
-        ColorGrid(
-            onColorClick = {sequence.add(it)}
-        )
+    if(orientation.orientation == Configuration.ORIENTATION_PORTRAIT){
+        Column(
+            modifier = Modifier
+              .fillMaxSize()
+              .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly
+        ) {
+            ColorGrid(
+                onColorClick = { sequence.add(it) },
+            )
 
-        Display(
-            sequence = sequence
-        )
+            Display(
+                sequence = sequence
+            )
 
-        ButtonArea(
-            onClear = {sequence.clear()},
-            onEndGame = {}
-        )
+            ButtonArea(
+                onClear = { sequence.clear() },
+                onEndGame = {}
+            )
+        }
+    }else{
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(32.dp)
+        ){
+            Box(modifier=Modifier
+                .weight(0.5f)
+                .fillMaxHeight()
+            ) {
+                ColorGrid(
+                    onColorClick = { sequence.add(it) },
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ){
+                Display(
+                    sequence = sequence
+                )
+
+                ButtonArea(
+                    onClear = { sequence.clear() },
+                    onEndGame = {}
+                )
+            }
+        }
     }
 }
 
@@ -67,7 +108,7 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
     Box(
         modifier = Modifier
             .padding(4.dp)
-            .aspectRatio(0.95f)
+            .aspectRatio(4f/3f)
             .background(colorItem.color)
             .clickable {
                 onClick(colorItem.letter)
@@ -86,7 +127,7 @@ private fun ColorGrid(onColorClick: (String) -> Unit){
         items(ColorData.entries) { colorItem ->
             ColorButton(
                 colorItem = colorItem,
-                onClick = onColorClick
+                onClick = onColorClick,
             )
         }
     }
@@ -94,7 +135,16 @@ private fun ColorGrid(onColorClick: (String) -> Unit){
 
 @Composable
 private fun Display(sequence: List<String>){
-    val textShown = sequence.joinToString(", ")
+    val placeholderText = stringResource(R.string.placeholder)
+    val textShown = if (sequence.isEmpty()) {
+        placeholderText
+    }else{
+        sequence.joinToString(", ")
+    }
+    val scrollState = rememberScrollState()
+    LaunchedEffect(textShown){
+        scrollState.animateScrollTo(scrollState.maxValue)
+    }
     Surface(
         modifier = Modifier.fillMaxWidth()
             .height(75.dp),
@@ -104,10 +154,11 @@ private fun Display(sequence: List<String>){
         Box(
             modifier = Modifier
                 .padding(12.dp)
-                .verticalScroll(rememberScrollState())
+                .verticalScroll(scrollState)
         ){
             Text(
-                text = textShown
+                text = textShown,
+                color = if(sequence.isEmpty()) Color.Gray else Color.Black
             )
         }
     }
