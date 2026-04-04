@@ -41,7 +41,7 @@ import com.compagnofederico.simon.components.ColorData
 import com.compagnofederico.simon.R
 
 @Composable
-fun Screen1() {
+fun Screen1(onEndGame: (List<String>) -> Unit) {
     // Stato persistente alla rotazione
     val sequence = rememberSaveable { mutableStateListOf<String>() }
     val orientation = LocalConfiguration.current
@@ -64,7 +64,10 @@ fun Screen1() {
 
             ButtonArea(
                 onClear = { sequence.clear() },
-                onEndGame = {}
+                onEndGame = {
+                    onEndGame(sequence)
+                    sequence.clear()
+                }
             )
         }
     }else{
@@ -96,7 +99,10 @@ fun Screen1() {
 
                 ButtonArea(
                     onClear = { sequence.clear() },
-                    onEndGame = {}
+                    onEndGame = {
+                        onEndGame(sequence)
+                        sequence.clear()
+                    }
                 )
             }
         }
@@ -118,6 +124,7 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
 
 @Composable
 private fun ColorGrid(onColorClick: (String) -> Unit){
+    // Elenchi Lazy: https://developer.android.com/develop/ui/compose/lists?hl=it
     LazyVerticalGrid(
         // Fisso il numero di colonne
         columns = GridCells.Fixed(2),
@@ -146,7 +153,8 @@ private fun Display(sequence: List<String>){
         scrollState.animateScrollTo(scrollState.maxValue)
     }
     Surface(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .height(75.dp),
         color = Color(0xFFEEEEEE),
         shape = MaterialTheme.shapes.medium

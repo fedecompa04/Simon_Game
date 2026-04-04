@@ -12,9 +12,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.*
 import com.compagnofederico.simon.screens.Screen1
+import com.compagnofederico.simon.screens.Screen2
 import com.compagnofederico.simon.ui.theme.SimonTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,13 +27,31 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent{
             MaterialTheme {
+                val navController = rememberNavController()
+                val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
                         .safeDrawingPadding(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Screen1()
+                    NavHost(
+                        navController = navController,
+                        startDestination = "Screen1",
+                    ){
+                        composable("Screen1") {
+                            Screen1(
+                                onEndGame = { sequenceList ->
+                                    val sequenceString = sequenceList.joinToString(", ")
+                                    gameHistory.add(sequenceString)
+                                    navController.navigate("Screen2") }
+                            )
+                        }
+                        composable("Screen2") {
+                            Screen2(gameHistory)
+                        }
+                    }
+
                 }
             }
         }
