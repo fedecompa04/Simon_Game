@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Simon</string>
+    <string name="button_clear">Delete</string>
+    <string name="button_end">End Game</string>
+    <string name="placeholder">Color sequence…</string>
+</resources>
