@@ -17,9 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.compagnofederico.simon.R
 
 @Composable
 fun Screen2(history: List<String>){
@@ -36,10 +38,18 @@ fun Screen2(history: List<String>){
 
 @Composable
 private fun MatchResult(game: String){
+    val cont: Int = CountChar(game)
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
         color = Color(0xFFEEEEEE),
+        /*
+        color = if(cont > 0) {
+            Color(0xFFEEEEEE)
+        }else{
+            Color(0xFFFFB300)
+        },
+         */
         shape = MaterialTheme.shapes.medium
     ) {
         Row(
@@ -49,12 +59,13 @@ private fun MatchResult(game: String){
             horizontalArrangement = Arrangement.spacedBy(32.dp)
         ) {
             Text(
-                text = CountChar(game).toString(),
+                text = cont.toString(),
                 modifier = Modifier.width(30.dp),
                 fontWeight = FontWeight.Bold
             )
 
             Text(
+                // text = if(cont>0) game else stringResource(R.string.ongoing),
                 text = game,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
