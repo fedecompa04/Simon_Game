@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 val navController = rememberNavController()
                 val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
+                val sequenceString = rememberSaveable{mutableStateOf("")}
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
@@ -42,13 +44,16 @@ class MainActivity : ComponentActivity() {
                         composable("Screen1") {
                             Screen1(
                                 onEndGame = { sequenceList ->
-                                    val sequenceString = sequenceList.joinToString(", ")
-                                    gameHistory.add(sequenceString)
-                                    navController.navigate("Screen2") }
+                                    sequenceString.value = sequenceList.joinToString(", ")
+                                    if(sequenceString.value.isNotEmpty()) gameHistory.add(sequenceString.value)
+                                    navController.navigate("Screen2"){
+                                        launchSingleTop = true
+                                    }
+                                }
                             )
                         }
                         composable("Screen2") {
-                            Screen2(gameHistory)
+                            Screen2(gameHistory, sequenceString.value)
                         }
                     }
 

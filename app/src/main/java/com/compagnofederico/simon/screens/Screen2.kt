@@ -18,38 +18,37 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.compagnofederico.simon.R
 
 @Composable
-fun Screen2(history: List<String>){
+fun Screen2(history: List<String>, currentSequence: String){
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ){
-        items(history){
-            game -> MatchResult(game)
+        items(history) {
+            game -> MatchResult(game, inProgress = false)
+        }
+        if(currentSequence.isEmpty()) {
+            item {
+                MatchResult(game = currentSequence, inProgress = true)
+            }
         }
     }
 }
 
 @Composable
-private fun MatchResult(game: String){
+private fun MatchResult(game: String, inProgress: Boolean){
     val cont: Int = CountChar(game)
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
-        color = Color(0xFFEEEEEE),
-        /*
-        color = if(cont > 0) {
-            Color(0xFFEEEEEE)
-        }else{
-            Color(0xFFFFB300)
-        },
-         */
+        color = if(inProgress) Color(0xFFFFB300) else Color(0xFFEEEEEE),
         shape = MaterialTheme.shapes.medium
     ) {
         Row(
@@ -65,8 +64,8 @@ private fun MatchResult(game: String){
             )
 
             Text(
-                // text = if(cont>0) game else stringResource(R.string.ongoing),
-                text = game,
+                text = if(inProgress) stringResource(R.string.ongoing) else game,
+                fontStyle = if(inProgress) FontStyle.Italic else FontStyle.Normal,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
