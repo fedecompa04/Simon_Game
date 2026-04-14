@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent{
-            MaterialTheme {
+            SimonTheme {
                 val navController = rememberNavController()
                 val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
                 val sequenceString = rememberSaveable{mutableStateOf("")}
