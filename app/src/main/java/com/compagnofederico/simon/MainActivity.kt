@@ -46,9 +46,7 @@ class MainActivity : ComponentActivity() {
                                 onEndGame = { sequenceList ->
                                     sequenceString.value = sequenceList.joinToString(", ")
                                     if(sequenceString.value.isNotEmpty()) gameHistory.add(sequenceString.value)
-                                    navController.navigate("Screen2"){
-                                        launchSingleTop = true
-                                    }
+                                    navController.navigate("Screen2")
                                 }
                             )
                         }
