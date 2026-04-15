@@ -46,7 +46,7 @@ private fun MatchResult(game: String, inProgress: Boolean){
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
-        color = if(inProgress) Color(0xFFFFB300) else Color(0xFFEEEEEE),
+        color = if(inProgress) Color(0xFFFFB300) else MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium
     ) {
         Row(
