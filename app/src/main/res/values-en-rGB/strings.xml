@@ -5,4 +5,5 @@
     <string name="button_end">End Game</string>
     <string name="placeholder">Color sequence…</string>
     <string name="ongoing">Match in progress</string>
+    <string name="summary">MATCH SUMMARY</string>
 </resources>
