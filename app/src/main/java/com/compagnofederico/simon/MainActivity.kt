@@ -27,9 +27,7 @@ class MainActivity : ComponentActivity() {
                 val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
                 val sequenceString = rememberSaveable{mutableStateOf("")}
                 Surface(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .safeDrawingPadding(),
+                    modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     NavHost(

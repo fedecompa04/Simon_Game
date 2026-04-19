@@ -1,12 +1,16 @@
 package com.compagnofederico.simon.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.MaterialTheme
@@ -25,25 +29,30 @@ import com.compagnofederico.simon.R
 
 @Composable
 fun Screen2(history: List<String>, currentSequence: String){
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ){
-        item{
-            Text(
-                text = stringResource(R.string.summary),
-                fontFamily = FontFamily.Monospace,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.ExtraBold,
-            )
-        }
-        items(history) {
-            game -> MatchResult(game, inProgress = false)
-        }
-        if(currentSequence.isEmpty()) {
-            item {
-                MatchResult(game = currentSequence, inProgress = true)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .windowInsetsPadding(WindowInsets.safeDrawing)
+    ) {
+        Text(
+            text = stringResource(R.string.summary),
+            fontFamily = FontFamily.Monospace,
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.ExtraBold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
+        )
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(history) { game ->
+                MatchResult(game, inProgress = false)
+            }
+            if (currentSequence.isEmpty()) {
+                item {
+                    MatchResult(game = currentSequence, inProgress = true)
+                }
             }
         }
     }
