@@ -27,13 +27,20 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.compagnofederico.simon.R
 
+/**
+ * Screen displaying the history of all games played.
+ * @param history List of strings representing game sequences.
+ * @param currentSequence Sequence of the game currently being played.
+ */
 @Composable
 fun Screen2(history: List<String>, currentSequence: String){
     Column(
         modifier = Modifier
             .fillMaxSize()
+            // safeDrawing handles the spaces for system bars and camera
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
+        // Screen Title
         Text(
             text = stringResource(R.string.summary),
             fontFamily = FontFamily.Monospace,
@@ -41,14 +48,17 @@ fun Screen2(history: List<String>, currentSequence: String){
             fontWeight = FontWeight.ExtraBold,
             modifier = Modifier.padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
         )
+        // Scrollable list that displays the history of the played matches
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            // Display completed matches
             items(history) { game ->
                 MatchResult(game, inProgress = false)
             }
+            // Show the current game (0 elements means in progress)
             if (currentSequence.isEmpty()) {
                 item {
                     MatchResult(game = currentSequence, inProgress = true)
@@ -58,12 +68,18 @@ fun Screen2(history: List<String>, currentSequence: String){
     }
 }
 
+/**
+ * Component representing a single game result card.
+ * @param game String representation of the color sequence.
+ * @param inProgress Boolean flag to distinguish between a finished game and an active one.
+ */
 @Composable
 private fun MatchResult(game: String, inProgress: Boolean){
     val cont: Int = countChar(game)
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
+        // Active games are highlighted with an orange color
         color = if(inProgress) Color(0xFFFFB300) else MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium
     ) {
@@ -73,12 +89,13 @@ private fun MatchResult(game: String, inProgress: Boolean){
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(32.dp)
         ) {
+            // Shows the score on the left
             Text(
                 text = cont.toString(),
                 modifier = Modifier.width(30.dp),
                 fontWeight = FontWeight.Bold
             )
-
+            // Shows the color sequence or the "ongoing" string if in progess
             Text(
                 text = if(inProgress) stringResource(R.string.ongoing) else game,
                 fontStyle = if(inProgress) FontStyle.Italic else FontStyle.Normal,
@@ -89,6 +106,12 @@ private fun MatchResult(game: String, inProgress: Boolean){
     }
 }
 
+/**
+ * Helper function to calculate the number of letters in the string that represents the number of
+ * colored buttons clicked.
+ * @param s Sequence string.
+ * @return Integer count of letters in the sequence.
+ */
 private fun countChar(s: String): Int{
     var count = 0
     for(c in s){

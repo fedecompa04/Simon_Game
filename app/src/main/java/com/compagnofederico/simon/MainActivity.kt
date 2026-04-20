@@ -17,6 +17,10 @@ import com.compagnofederico.simon.screens.Screen1
 import com.compagnofederico.simon.screens.Screen2
 import com.compagnofederico.simon.ui.theme.SimonTheme
 
+/**
+ * Main entry point of the application.
+ * Manages navigation and the state for game history.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +38,7 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = "Screen1",
                     ){
+                        // Main game screen
                         composable("Screen1") {
                             Screen1(
                                 onEndGame = { sequenceList ->
@@ -43,6 +48,7 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
+                        // History summary screen
                         composable("Screen2") {
                             Screen2(gameHistory, sequenceString.value)
                         }

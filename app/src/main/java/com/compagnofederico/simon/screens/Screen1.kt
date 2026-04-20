@@ -38,16 +38,23 @@ import androidx.compose.ui.unit.dp
 import com.compagnofederico.simon.components.ColorData
 import com.compagnofederico.simon.R
 
+/**
+ * Primary game screen where the user interacts with the Simon sequence.
+ * @param onEndGame Callback function called when the game is finished, passing the recorded sequence.
+ */
 @Composable
 fun Screen1(onEndGame: (List<String>) -> Unit) {
-    // Stato persistente alla rotazione
+    // remeberSaveable: keeps the sequence state alive even during screen rotations
     val sequence = rememberSaveable { mutableStateListOf<String>() }
+    // Get current device confugation
     val orientation = LocalConfiguration.current
-    // Layout portrait: colonna verticale
+
+    // PORTRAIT MODE
     if(orientation.orientation == Configuration.ORIENTATION_PORTRAIT){
         Column(
             modifier = Modifier
               .fillMaxSize()
+              // safeDrawing handles the spaces for system bars and camera
               .windowInsetsPadding(WindowInsets.safeDrawing)
               .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -67,10 +74,12 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
                 }
             )
         }
+    // LANDSCAPE MODE
     }else{
         Row(
             modifier = Modifier
                 .fillMaxSize()
+                // safeDrawing handles the spaces for system bars and camera
                 .windowInsetsPadding(WindowInsets.safeDrawing)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -84,7 +93,6 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
                     onColorClick = { sequence.add(it) },
                 )
             }
-
             Column(
                 modifier = Modifier
                     .weight(1f),
@@ -94,7 +102,6 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
                 Display(
                     sequence = sequence
                 )
-
                 ButtonArea(
                     onClear = { sequence.clear() },
                     onEndGame = {
@@ -107,6 +114,12 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
     }
 }
 
+/**
+ * Single button used in the game grid.
+ * @param colorItem Data object containing the color value and the associated letter.
+ * @param onClick Callback function invoked when a colored button is clicked, passing the color's
+ * initial letter.
+ */
 @Composable
 private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
     Box(
@@ -120,13 +133,14 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
     )
 }
 
+/**
+ * A 3x2 grid of "ColorButton" displaying the six colors of the game.
+ * @param onColorClick Callback function invoked when any color button in the grid is clicked.
+ */
 @Composable
 private fun ColorGrid(onColorClick: (String) -> Unit){
-    // Elenchi Lazy: https://developer.android.com/develop/ui/compose/lists?hl=it
     LazyVerticalGrid(
-        // Fisso il numero di colonne
         columns = GridCells.Fixed(2),
-        // La rendo non scrollabile
         userScrollEnabled = false
     ) {
         items(ColorData.entries) { colorItem ->
@@ -138,6 +152,10 @@ private fun ColorGrid(onColorClick: (String) -> Unit){
     }
 }
 
+/**
+ * A display area that shows the current sequence of the initials of the clicked colors.
+ * @param sequence List of color initials selected by the user.
+ */
 @Composable
 private fun Display(sequence: List<String>){
     val placeholderText = stringResource(R.string.placeholder)
@@ -146,6 +164,7 @@ private fun Display(sequence: List<String>){
     }else{
         sequence.joinToString(", ")
     }
+    // Auto-scroll logic: whenever the text updates, scroll to the bottom of the box
     val scrollState = rememberScrollState()
     LaunchedEffect(textShown){
         scrollState.animateScrollTo(scrollState.maxValue)
@@ -170,6 +189,11 @@ private fun Display(sequence: List<String>){
     }
 }
 
+/**
+ * Area containing "Clear" and "EndGame" buttons
+ * @param onClear Callback function invoked when the user wants to reset the current sequence
+ * @param onEndGame Callback function invoked when the user wants to finish the game and save the result
+ */
 @Composable
 private fun ButtonArea(onClear: () -> Unit, onEndGame: () -> Unit){
     Row(
