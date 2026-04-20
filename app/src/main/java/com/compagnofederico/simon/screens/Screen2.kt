@@ -39,7 +39,7 @@ fun Screen2(history: List<String>, currentSequence: String){
             fontFamily = FontFamily.Monospace,
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
+            modifier = Modifier.padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
         )
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
