@@ -4,6 +4,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -36,6 +39,9 @@ class MainActivity : ComponentActivity() {
                     NavHost(
                         navController = navController,
                         startDestination = "Screen1",
+                        // Deal with refresh time in the changing between a screen and the other one
+                        enterTransition = { fadeIn(animationSpec = tween(150)) },
+                        exitTransition = { fadeOut(animationSpec = tween(150)) },
                     ){
                         // Main game screen
                         composable("Screen1") {
