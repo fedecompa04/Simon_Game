@@ -45,10 +45,9 @@ import com.compagnofederico.simon.R
 @Composable
 fun Screen1(onEndGame: (List<String>) -> Unit) {
     // remeberSaveable: keeps the sequence state alive even during screen rotations
-    val sequence = rememberSaveable { mutableStateListOf<String>() }
+    val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device confugation
     val orientation = LocalConfiguration.current
-
     // PORTRAIT MODE
     if(orientation.orientation == Configuration.ORIENTATION_PORTRAIT){
         Column(

@@ -13,10 +13,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -34,6 +36,12 @@ import com.compagnofederico.simon.R
  */
 @Composable
 fun Screen2(history: List<String>, currentSequence: String){
+    // Auto-scroll logic: whenever the list of sequences update its size the screen will auto-scroll
+    // so we follow the last match played
+    val scrollState = rememberLazyListState()
+    LaunchedEffect(history.size){
+        scrollState.animateScrollToItem(history.size - 1)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,9 +58,11 @@ fun Screen2(history: List<String>, currentSequence: String){
         )
         // Scrollable list that displays the history of the played matches
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth(),
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            state = scrollState
         ) {
             // Display completed matches
             items(history) { game ->
@@ -95,7 +105,7 @@ private fun MatchResult(game: String, inProgress: Boolean){
                 modifier = Modifier.width(30.dp),
                 fontWeight = FontWeight.Bold
             )
-            // Shows the color sequence or the "ongoing" string if in progess
+            // Shows the color sequence or the "ongoing" string if in progress
             Text(
                 text = if(inProgress) stringResource(R.string.ongoing) else game,
                 fontStyle = if(inProgress) FontStyle.Italic else FontStyle.Normal,
