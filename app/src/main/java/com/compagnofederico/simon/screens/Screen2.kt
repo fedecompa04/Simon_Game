@@ -32,10 +32,9 @@ import com.compagnofederico.simon.R
 /**
  * Screen displaying the history of all games played.
  * @param history List of strings representing game sequences.
- * @param currentSequence Sequence of the game currently being played.
  */
 @Composable
-fun Screen2(history: List<String>, currentSequence: String){
+fun Screen2(history: List<String>){
     // Auto-scroll logic: whenever the list of sequences update its size the screen will auto-scroll
     // so we follow the last match played
     val scrollState = rememberLazyListState()
@@ -65,32 +64,26 @@ fun Screen2(history: List<String>, currentSequence: String){
             state = scrollState
         ) {
             // Display completed matches
-            items(history) { game ->
-                MatchResult(game, inProgress = false)
-            }
-            // Show the current game (0 elements means in progress)
-            if (currentSequence.isEmpty()) {
-                item {
-                    MatchResult(game = currentSequence, inProgress = true)
+                items(history) { game ->
+                    MatchResult(game)
                 }
-            }
         }
     }
 }
 
+
 /**
  * Component representing a single game result card.
  * @param game String representation of the color sequence.
- * @param inProgress Boolean flag to distinguish between a finished game and an active one.
  */
 @Composable
-private fun MatchResult(game: String, inProgress: Boolean){
+private fun MatchResult(game: String){
     val cont: Int = countChar(game)
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
         // Active games are highlighted with an orange color
-        color = if(inProgress) Color(0xFFFFB300) else MaterialTheme.colorScheme.surfaceVariant,
+        color = MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium
     ) {
         Row(
@@ -105,10 +98,9 @@ private fun MatchResult(game: String, inProgress: Boolean){
                 modifier = Modifier.width(30.dp),
                 fontWeight = FontWeight.Bold
             )
-            // Shows the color sequence or the "ongoing" string if in progress
+            // Shows the color sequence
             Text(
-                text = if(inProgress) stringResource(R.string.ongoing) else game,
-                fontStyle = if(inProgress) FontStyle.Italic else FontStyle.Normal,
+                text = game,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )

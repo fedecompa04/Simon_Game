@@ -48,14 +48,14 @@ class MainActivity : ComponentActivity() {
                             Screen1(
                                 onEndGame = { sequenceList ->
                                     sequenceString.value = sequenceList.joinToString(", ")
-                                    if(sequenceString.value.isNotEmpty()) gameHistory.add(sequenceString.value)
+                                    gameHistory.add(sequenceString.value)
                                     navController.navigate("Screen2")
                                 }
                             )
                         }
                         // History summary screen
                         composable("Screen2") {
-                            Screen2(gameHistory, sequenceString.value)
+                            Screen2(gameHistory)
                         }
                     }
 
