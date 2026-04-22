@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = "Screen1",
                         // Deal with refresh time in the changing between a screen and the other one
                         enterTransition = { fadeIn(animationSpec = tween(150)) },
-                        exitTransition = { fadeOut(animationSpec = tween(150)) },
+                        exitTransition = { fadeOut(animationSpec = tween(150)) }
                     ){
                         // Main game screen
                         composable("Screen1") {
