@@ -9,3 +9,5 @@ L'applicazione consiste in un prototipo per una variante del gioco "Simon".
 
 ## Note di implementazione
 Il progetto è stato realizzato in **Jetpack Compose** consultando la documentazione ufficiale e le librerie dei framework di Android e Jetpack.
+
+<span style="color: grey;">*Compagno Federico 2101752*</span>
