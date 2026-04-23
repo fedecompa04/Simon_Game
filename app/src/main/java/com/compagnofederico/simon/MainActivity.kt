@@ -1,3 +1,5 @@
+// Compagno Federico 2101752
+
 package com.compagnofederico.simon
 
 import android.os.Bundle
@@ -24,6 +26,10 @@ import com.compagnofederico.simon.ui.theme.SimonTheme
  * Manages navigation and the state for game history.
  */
 class MainActivity : ComponentActivity() {
+    /**
+     * Initializes the activity and sets up the UI architecture.
+     * @param savedInstanceState Bundle containing the activity's previous state if there was one.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()

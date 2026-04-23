@@ -1,3 +1,5 @@
+// Compagno Federico 2101752
+
 package com.compagnofederico.simon.ui.theme
 
 import android.app.Activity
