@@ -46,8 +46,8 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = "Screen1",
                         // Deal with refresh time in the changing between a screen and the other one
-                        enterTransition = { fadeIn(animationSpec = tween(150)) },
-                        exitTransition = { fadeOut(animationSpec = tween(150)) }
+                        enterTransition = { fadeIn(animationSpec = tween(175)) },
+                        exitTransition = { fadeOut(animationSpec = tween(175)) }
                     ){
                         // Main game screen
                         composable("Screen1") {
