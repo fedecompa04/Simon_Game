@@ -1,7 +1,8 @@
 <!-- Compagno Federico 2101752 -->
 <resources>
     <string name="app_name">Simon</string>
-    <string name="button_clear">Cancella</string>
+    <string name="button_start">Avvia Partita</string>
+    <string name="button_pause">Pausa</string>
     <string name="button_end">Fine Partita</string>
     <string name="placeholder">Sequenza di colori…</string>
     <string name="ongoing">Partita in corso</string>

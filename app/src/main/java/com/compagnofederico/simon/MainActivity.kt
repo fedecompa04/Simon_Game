@@ -16,7 +16,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
+import com.compagnofederico.simon.components.GameViewModel
 import com.compagnofederico.simon.screens.Screen1
 import com.compagnofederico.simon.screens.Screen2
 import com.compagnofederico.simon.ui.theme.SimonTheme
@@ -38,6 +40,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
                 val sequenceString = rememberSaveable{mutableStateOf("")}
+                val gameViewModel: GameViewModel = viewModel()
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -52,6 +55,7 @@ class MainActivity : ComponentActivity() {
                         // Main game screen
                         composable("Screen1") {
                             Screen1(
+                                viewModel = gameViewModel,
                                 onEndGame = { sequenceList ->
                                     sequenceString.value = sequenceList.joinToString(", ")
                                     gameHistory.add(sequenceString.value)

@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -36,16 +38,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.compagnofederico.simon.components.ColorData
 import com.compagnofederico.simon.R
+import com.compagnofederico.simon.components.GameViewModel
 
 /**
  * Primary game screen where the user interacts with the Simon sequence.
  * @param onEndGame Callback function called when the game is finished, passing the recorded sequence.
  */
 @Composable
-fun Screen1(onEndGame: (List<String>) -> Unit) {
+fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     // rememberSaveable: keeps the sequence state alive even during screen rotations
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration
@@ -68,7 +72,10 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
                 sequence = sequence
             )
             ButtonArea(
-                onClear = { sequence.clear() },
+                onStart = {
+                    viewModel.startMatch()
+                },
+                onPause = {},
                 onEndGame = {
                     onEndGame(sequence)
                     sequence.clear()
@@ -104,7 +111,12 @@ fun Screen1(onEndGame: (List<String>) -> Unit) {
                     sequence = sequence
                 )
                 ButtonArea(
-                    onClear = { sequence.clear() },
+                    onStart = {
+                        viewModel.startMatch()
+                    },
+                    onPause = {
+
+                    },
                     onEndGame = {
                         onEndGame(sequence)
                         sequence.clear()
@@ -196,16 +208,33 @@ private fun Display(sequence: List<String>){
  * @param onEndGame Callback function invoked when the user wants to finish the game and save the result
  */
 @Composable
-private fun ButtonArea(onClear: () -> Unit, onEndGame: () -> Unit){
+private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -> Unit){
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ){
-        Button(onClick = onClear){
-            Text(stringResource(R.string.button_clear))
+        Button(
+            onClick = onStart,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(4.dp) // Riduce il padding interno per far stare il testo
+        ){
+            Text(stringResource(R.string.button_start), maxLines = 1, textAlign = TextAlign.Center)
         }
-        Button(onClick = onEndGame){
-            Text(stringResource(R.string.button_end))
+
+        Button(
+            onClick = onPause,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(4.dp)
+        ){
+            Text(stringResource(R.string.button_pause), maxLines = 1, textAlign = TextAlign.Center)
+        }
+
+        Button(
+            onClick = onEndGame,
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(4.dp)
+        ){
+            Text(stringResource(R.string.button_end), maxLines = 1, textAlign = TextAlign.Center)
         }
     }
 }
