@@ -4,6 +4,7 @@ package com.compagnofederico.simon.screens
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -54,6 +55,11 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration
     val orientation = LocalConfiguration.current
+    LaunchedEffect(viewModel.isGameOver, viewModel.isComputerPlaying) {
+        if (viewModel.isComputerPlaying || viewModel.isGameOver) {
+            sequence.clear()
+        }
+    }
     // PORTRAIT MODE
     if(orientation.orientation == Configuration.ORIENTATION_PORTRAIT){
         Column(
@@ -66,10 +72,15 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
             verticalArrangement = Arrangement.SpaceEvenly
         ) {
             ColorGrid(
-                onColorClick = { sequence.add(it) },
+                onColorClick = { color->
+                    sequence.add(color)
+                    viewModel.onUserClick(color) },
+                viewModel.isComputerPlaying,
+                viewModel.highlightedColor,
+                viewModel.isGameStarted
             )
             Display(
-                sequence = sequence
+                if(viewModel.isComputerPlaying) emptyList() else sequence
             )
             ButtonArea(
                 onStart = {
@@ -98,7 +109,12 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 .fillMaxHeight()
             ) {
                 ColorGrid(
-                    onColorClick = { sequence.add(it) },
+                    onColorClick = { color->
+                        sequence.add(color)
+                        viewModel.onUserClick(color) },
+                    viewModel.isComputerPlaying,
+                    viewModel.highlightedColor,
+                    viewModel.isGameStarted
                 )
             }
             Column(
@@ -108,7 +124,7 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Display(
-                    sequence = sequence
+                    if(viewModel.isComputerPlaying) emptyList() else sequence
                 )
                 ButtonArea(
                     onStart = {
@@ -134,15 +150,22 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
  * initial letter.
  */
 @Composable
-private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
+private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isComputerPlaying: Boolean,
+                        highlightedColor: String?, isGameStarted: Boolean){
+    // Controlliamo se questo specifico bottone deve illuminarsi
+    val isHighlighted = colorItem.letter == highlightedColor
     Box(
         modifier = Modifier
             .padding(4.dp)
             .aspectRatio(4f/3f)
-            .background(colorItem.color)
-            .clickable {
+            .background(if (isHighlighted) colorItem.color.copy(alpha = 0.5f) else colorItem.color)
+            .clickable(enabled = !isComputerPlaying) { // Disabilitiamo il click durante il turno del PC
                 onClick(colorItem.letter)
             }
+            .border(
+                width = if (isHighlighted) 6.dp else 0.dp,
+                color = if (isHighlighted) Color.White else Color.Transparent,
+            )
     )
 }
 
@@ -151,7 +174,8 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit){
  * @param onColorClick Callback function invoked when any color button in the grid is clicked.
  */
 @Composable
-private fun ColorGrid(onColorClick: (String) -> Unit){
+private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean, highlightedColor: String?,
+                      isGameStarted: Boolean){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         userScrollEnabled = false
@@ -160,6 +184,9 @@ private fun ColorGrid(onColorClick: (String) -> Unit){
             ColorButton(
                 colorItem = colorItem,
                 onClick = onColorClick,
+                isComputerPlaying = isComputerPlaying,
+                highlightedColor = highlightedColor,
+                isGameStarted = isGameStarted
             )
         }
     }
