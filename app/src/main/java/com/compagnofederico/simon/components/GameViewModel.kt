@@ -1,11 +1,9 @@
 package com.compagnofederico.simon.components
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
@@ -18,12 +16,19 @@ class GameViewModel: ViewModel() {
     var isComputerPlaying by mutableStateOf(false)
     var isGameOver by mutableStateOf(false)
     var isGameStarted by mutableStateOf(false)
+    var isPaused by mutableStateOf(false)
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
 
+    fun togglePause(){
+        if(isComputerPlaying){
+            isPaused = !isPaused
+        }
+    }
     fun startMatch(){
+        isGameOver = false
+        isGameStarted = true
         computerSequence.clear()
         playerSequence.clear()
-        isGameOver = false
         computerSequence.add(simonColors.random())
         playMatch()
     }
@@ -37,9 +42,14 @@ class GameViewModel: ViewModel() {
     private fun playMatch(){
         viewModelScope.launch{
             isComputerPlaying = true
+            delay(1000)
             for(color in computerSequence){
+                while(isPaused){
+                    delay(1000)
+                }
                 highlightedColor = color
-                delay(500)
+                // soundHelper.play(color)
+                delay(800)
                 highlightedColor = null
                 delay(200)
             }
@@ -48,7 +58,7 @@ class GameViewModel: ViewModel() {
     }
 
     fun onUserClick(color: String){
-        if(isComputerPlaying || isGameOver) return
+        if(!isGameStarted || isComputerPlaying || isGameOver) return
         playerSequence.add(color)
         if(playerSequence[playerSequence.size - 1] == computerSequence[playerSequence.size - 1]){
             if(playerSequence.size == computerSequence.size){
@@ -59,6 +69,7 @@ class GameViewModel: ViewModel() {
             }
         }else{
             isGameOver = true
+            isGameStarted = false
             computerSequence.clear()
             playerSequence.clear()
         }

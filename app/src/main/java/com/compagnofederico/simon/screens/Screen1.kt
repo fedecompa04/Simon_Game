@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -57,7 +56,7 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     val orientation = LocalConfiguration.current
     LaunchedEffect(viewModel.isGameOver, viewModel.isComputerPlaying) {
         if (viewModel.isComputerPlaying || viewModel.isGameOver) {
-            sequence.clear()
+            sequence.clear()    // GESTIRE SALVATAGGIO SU DATABASE
         }
     }
     // PORTRAIT MODE
@@ -80,17 +79,23 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 viewModel.isGameStarted
             )
             Display(
-                if(viewModel.isComputerPlaying) emptyList() else sequence
+                if(viewModel.isComputerPlaying) emptyList() else sequence,
+                viewModel.isGameStarted
             )
             ButtonArea(
                 onStart = {
                     viewModel.startMatch()
                 },
-                onPause = {},
+                onPause = {
+                    viewModel.togglePause()
+                },
                 onEndGame = {
                     onEndGame(sequence)
                     sequence.clear()
-                }
+                },
+                viewModel.isComputerPlaying,
+                viewModel.isGameStarted,
+                viewModel.isPaused
             )
         }
     // LANDSCAPE MODE
@@ -124,19 +129,23 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ){
                 Display(
-                    if(viewModel.isComputerPlaying) emptyList() else sequence
+                    if(viewModel.isComputerPlaying) emptyList() else sequence,
+                    viewModel.isGameStarted
                 )
                 ButtonArea(
                     onStart = {
                         viewModel.startMatch()
                     },
                     onPause = {
-
+                        viewModel.togglePause()
                     },
                     onEndGame = {
                         onEndGame(sequence)
                         sequence.clear()
-                    }
+                    },
+                    viewModel.isComputerPlaying,
+                    viewModel.isGameStarted,
+                    viewModel.isPaused
                 )
             }
         }
@@ -152,14 +161,17 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
 @Composable
 private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isComputerPlaying: Boolean,
                         highlightedColor: String?, isGameStarted: Boolean){
-    // Controlliamo se questo specifico bottone deve illuminarsi
     val isHighlighted = colorItem.letter == highlightedColor
+    val baseColor = when{
+        isHighlighted -> colorItem.color
+        else -> colorItem.color.copy(alpha = 0.4f)
+    }
     Box(
         modifier = Modifier
             .padding(4.dp)
             .aspectRatio(4f/3f)
-            .background(if (isHighlighted) colorItem.color.copy(alpha = 0.5f) else colorItem.color)
-            .clickable(enabled = !isComputerPlaying) { // Disabilitiamo il click durante il turno del PC
+            .background(baseColor)
+            .clickable(enabled = isGameStarted && !isComputerPlaying) { // Disabilitiamo il click durante il turno del PC
                 onClick(colorItem.letter)
             }
             .border(
@@ -174,8 +186,8 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isCompu
  * @param onColorClick Callback function invoked when any color button in the grid is clicked.
  */
 @Composable
-private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean, highlightedColor: String?,
-                      isGameStarted: Boolean){
+private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean,
+                      highlightedColor: String?, isGameStarted: Boolean){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         userScrollEnabled = false
@@ -197,10 +209,15 @@ private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean
  * @param sequence List of color initials selected by the user.
  */
 @Composable
-private fun Display(sequence: List<String>){
+private fun Display(sequence: List<String>, isGameStarted: Boolean){
     val placeholderText = stringResource(R.string.placeholder)
+    val starterText = stringResource(R.string.starter)
     val textShown = if (sequence.isEmpty()) {
-        placeholderText
+        if(isGameStarted) {
+            placeholderText
+        }else{
+            starterText
+        }
     }else{
         sequence.joinToString(", ")
     }
@@ -223,7 +240,7 @@ private fun Display(sequence: List<String>){
         ){
             Text(
                 text = textShown,
-                color = if(sequence.isEmpty()) Color.Gray else Color.Black
+                color = if(sequence.isEmpty() && isGameStarted) Color.Gray else Color.Black
             )
         }
     }
@@ -235,33 +252,53 @@ private fun Display(sequence: List<String>){
  * @param onEndGame Callback function invoked when the user wants to finish the game and save the result
  */
 @Composable
-private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -> Unit){
+private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -> Unit,
+                       isComputerPlaying: Boolean, isGameStarted: Boolean, isPaused: Boolean){
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ){
         Button(
             onClick = onStart,
+            enabled = !isGameStarted,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp) // Riduce il padding interno per far stare il testo
         ){
-            Text(stringResource(R.string.button_start), maxLines = 1, textAlign = TextAlign.Center)
+            Text(
+                text = stringResource(R.string.button_start),
+                maxLines = 1,
+                textAlign = TextAlign.Center
+            )
         }
 
         Button(
             onClick = onPause,
+            enabled = isComputerPlaying,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp)
         ){
-            Text(stringResource(R.string.button_pause), maxLines = 1, textAlign = TextAlign.Center)
+            Text(
+                text = if(!isPaused) {
+                    stringResource(R.string.button_pause)
+                }else{
+                    stringResource(R.string.button_resume)
+                },
+                textAlign = TextAlign.Center,
+                maxLines = 1
+            )
         }
 
         Button(
             onClick = onEndGame,
+            enabled = isGameStarted,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp)
         ){
-            Text(stringResource(R.string.button_end), maxLines = 1, textAlign = TextAlign.Center)
+            Text(
+                text = stringResource(R.string.button_end),
+                maxLines = 1,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
