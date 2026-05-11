@@ -1,15 +1,16 @@
 package com.compagnofederico.simon.components
 
+import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class GameViewModel: ViewModel() {
+class GameViewModel(application: Application): AndroidViewModel(application) {
     private val computerSequence = mutableStateListOf<String>()
     private val playerSequence = mutableStateListOf<String>()
     var highlightedColor by mutableStateOf<String?>(null)
@@ -18,6 +19,7 @@ class GameViewModel: ViewModel() {
     var isGameStarted by mutableStateOf(false)
     var isPaused by mutableStateOf(false)
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
+    private val soundHelper: SoundHelper = SoundHelper(application)
 
     fun togglePause(){
         if(isComputerPlaying){
@@ -48,7 +50,7 @@ class GameViewModel: ViewModel() {
                     delay(1000)
                 }
                 highlightedColor = color
-                // soundHelper.play(color)
+                soundHelper.playSound(color)
                 delay(800)
                 highlightedColor = null
                 delay(200)
