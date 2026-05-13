@@ -7,8 +7,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 
 class GameViewModel(application: Application): AndroidViewModel(application) {
     private val computerSequence = mutableStateListOf<String>()
@@ -18,6 +21,7 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     var isGameOver by mutableStateOf(false)
     var isGameStarted by mutableStateOf(false)
     var isPaused by mutableStateOf(false)
+    private var playJob: Job? = null
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
     private val soundHelper: SoundHelper = SoundHelper(application)
 
@@ -59,21 +63,29 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
         }
     }
 
+    fun gameEnded(){
+        playJob?.cancel()
+        isGameOver = true
+        isGameStarted = false
+        isPaused = false
+        isComputerPlaying = false
+        computerSequence.clear()
+        playerSequence.clear()
+        highlightedColor = null
+    }
     fun onUserClick(color: String){
         if(!isGameStarted || isComputerPlaying || isGameOver) return
         playerSequence.add(color)
         if(playerSequence[playerSequence.size - 1] == computerSequence[playerSequence.size - 1]){
             if(playerSequence.size == computerSequence.size){
-                viewModelScope.launch{
+                playJob?.cancel()
+                playJob = viewModelScope.launch{
                     delay(500)
-                    addNewColor()
+                    if(isActive && isGameStarted) addNewColor()
                 }
             }
         }else{
-            isGameOver = true
-            isGameStarted = false
-            computerSequence.clear()
-            playerSequence.clear()
+            gameEnded()
         }
     }
 }
