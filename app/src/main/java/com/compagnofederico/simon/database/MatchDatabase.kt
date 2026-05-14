@@ -1,21 +1,28 @@
 package com.compagnofederico.simon.database
 
 import android.content.Context
-import androidx.room3.Room
-import androidx.room3.RoomDatabase
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
 
+@Database(entities = [Match::class], version = 1, exportSchema = false)
 abstract class MatchDatabase : RoomDatabase(){
     abstract fun matchDao() : MatchDao
 
-    companion object{
-        private var db: MatchDatabase? = null
+    companion object {
+        @Volatile
+        private var INSTANCE: MatchDatabase? = null
 
-        fun getDatabase(context: Context) : MatchDatabase{
-            if(db == null) {
-                db = Room.databaseBuilder(context, MatchDatabase::class.java, "match_database")
-                    .build()
+        fun getDatabase(context: Context): MatchDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    MatchDatabase::class.java,
+                    "match_database"
+                ).build()
+                INSTANCE = instance
+                instance
             }
-            return db!!
         }
     }
 }

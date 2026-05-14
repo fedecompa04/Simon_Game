@@ -3,6 +3,7 @@
 package com.compagnofederico.simon.screens
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -16,57 +17,90 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.compagnofederico.simon.R
+import com.compagnofederico.simon.components.GameViewModel
+import com.compagnofederico.simon.database.Match
 
 /**
  * Screen displaying the history of all games played.
  * @param history List of strings representing game sequences.
  */
 @Composable
-fun Screen2(history: List<String>){
+fun Screen2(viewModel: GameViewModel, onGameScreen: () -> Unit){
+    // Carichiamo i dati all'avvio dello schermo
+    LaunchedEffect(Unit) {
+        viewModel.loadMatches()
+    }
+
+    // Osserviamo la variabile matchHistory del ViewModel
+    val history by viewModel.matchHistory
     // Auto-scroll logic: whenever the list of sequences update its size the screen will auto-scroll
     // so we follow the last match played
     val scrollState = rememberLazyListState()
     LaunchedEffect(history.size){
-        scrollState.animateScrollToItem(history.size - 1)
+        if(history.size > 0) {
+            scrollState.animateScrollToItem(history.size - 1)
+        }
     }
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            // safeDrawing handles the spaces for system bars and camera
             .windowInsetsPadding(WindowInsets.safeDrawing)
     ) {
-        // Screen Title
-        Text(
-            text = stringResource(R.string.summary),
-            fontFamily = FontFamily.Monospace,
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.ExtraBold,
-            modifier = Modifier.padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
-        )
-        // Scrollable list that displays the history of the played matches
-        LazyColumn(
+        Column(
             modifier = Modifier
-                .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            state = scrollState
+                .fillMaxSize()
+                // safeDrawing handles the spaces for system bars and camera
+                .windowInsetsPadding(WindowInsets.safeDrawing)
         ) {
-            // Display completed matches
-                items(history) { game ->
-                    MatchResult(game)
+            // Screen Title
+            Text(
+                text = stringResource(R.string.summary),
+                fontFamily = FontFamily.Monospace,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.ExtraBold,
+                modifier = Modifier.padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
+            )
+            // Scrollable list that displays the history of the played matches
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                state = scrollState
+            ) {
+                // Display completed matches
+                items(history) { match ->
+                    MatchResult(match.score, match.sequence, match.errorPosition)
                 }
+            }
+        }
+        FloatingActionButton(
+            onClick = onGameScreen,
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp),
+        ) {
+            Icon(Icons.Default.PlayArrow, stringResource(R.string.content_desc_FAB))
         }
     }
 }
@@ -77,8 +111,7 @@ fun Screen2(history: List<String>){
  * @param game String representation of the color sequence.
  */
 @Composable
-private fun MatchResult(game: String){
-    val cont: Int = countChar(game)
+private fun MatchResult(score: Int, game: String, errorPosition: Int){
     Surface(
         modifier = Modifier
             .fillMaxWidth(),
@@ -94,16 +127,20 @@ private fun MatchResult(game: String){
         ) {
             // Shows the score on the left
             Text(
-                text = cont.toString(),
+                text = score.toString(),
                 modifier = Modifier.width(30.dp),
                 fontWeight = FontWeight.Bold
             )
             // Shows the color sequence
-            Text(
-                text = game,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            val colors = game.split(", ")
+            colors.forEachIndexed { index, color ->
+                Text(
+                    text = color + (if(index < colors.size - 1) "," else ""),
+                    color = if(index >= errorPosition) Color.Red else Color.Black,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }

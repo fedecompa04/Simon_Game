@@ -47,25 +47,28 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = "Screen1",
+                        startDestination = "Screen2",
                         // Deal with refresh time in the changing between a screen and the other one
                         enterTransition = { fadeIn(animationSpec = tween(175)) },
                         exitTransition = { fadeOut(animationSpec = tween(175)) }
                     ){
                         // Main game screen
-                        composable("Screen1") {
-                            Screen1(
+                        composable("Screen2") {
+                            Screen2(
                                 viewModel = gameViewModel,
-                                onEndGame = { sequenceList ->
-                                    sequenceString.value = sequenceList.joinToString(", ")
-                                    gameHistory.add(sequenceString.value)
-                                    navController.navigate("Screen2")
+                                onGameScreen = {
+                                    navController.navigate("Screen1")
                                 }
                             )
                         }
                         // History summary screen
-                        composable("Screen2") {
-                            Screen2(gameHistory)
+                        composable("Screen1") {
+                            Screen1(
+                                viewModel = gameViewModel,
+                                onEndGame = {
+                                    gameViewModel.onEndGame()
+                                }
+                            )
                         }
                     }
 

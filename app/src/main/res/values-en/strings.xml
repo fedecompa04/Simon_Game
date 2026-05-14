@@ -10,4 +10,5 @@
     <string name="starter">Press Start Game!</string>
     <string name="ongoing">Match in progress</string>
     <string name="summary">MATCH SUMMARY</string>
+    <string name="content_desc_FAB">New Match</string>
 </resources>

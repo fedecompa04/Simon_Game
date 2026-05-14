@@ -90,7 +90,7 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                     viewModel.togglePause()
                 },
                 onEndGame = {
-                    viewModel.gameEnded()
+                    viewModel.onEndGame()
                     onEndGame(sequence)
                     sequence.clear()
                 },
@@ -141,7 +141,7 @@ fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                         viewModel.togglePause()
                     },
                     onEndGame = {
-                        viewModel.gameEnded()
+                        viewModel.onEndGame()
                         onEndGame(sequence)
                         sequence.clear()
                     },
