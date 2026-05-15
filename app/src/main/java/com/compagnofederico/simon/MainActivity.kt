@@ -19,8 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.compagnofederico.simon.components.GameViewModel
-import com.compagnofederico.simon.screens.Screen1
-import com.compagnofederico.simon.screens.Screen2
+import com.compagnofederico.simon.screens.GameScreen
+import com.compagnofederico.simon.screens.RecapScreen
 import com.compagnofederico.simon.ui.theme.SimonTheme
 
 /**
@@ -47,23 +47,23 @@ class MainActivity : ComponentActivity() {
                 ) {
                     NavHost(
                         navController = navController,
-                        startDestination = "Screen2",
+                        startDestination = "RecapScreen",
                         // Deal with refresh time in the changing between a screen and the other one
                         enterTransition = { fadeIn(animationSpec = tween(175)) },
                         exitTransition = { fadeOut(animationSpec = tween(175)) }
                     ){
                         // Main game screen
-                        composable("Screen2") {
-                            Screen2(
+                        composable("RecapScreen") {
+                            RecapScreen(
                                 viewModel = gameViewModel,
                                 onGameScreen = {
-                                    navController.navigate("Screen1")
+                                    navController.navigate("GameScreen")
                                 }
                             )
                         }
                         // History summary screen
-                        composable("Screen1") {
-                            Screen1(
+                        composable("GameScreen") {
+                            GameScreen(
                                 viewModel = gameViewModel,
                                 onEndGame = {
                                     gameViewModel.onEndGame()

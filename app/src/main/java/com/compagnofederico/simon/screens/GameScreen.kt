@@ -49,7 +49,7 @@ import com.compagnofederico.simon.components.GameViewModel
  * @param onEndGame Callback function called when the game is finished, passing the recorded sequence.
  */
 @Composable
-fun Screen1(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
+fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     // rememberSaveable: keeps the sequence state alive even during screen rotations
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration

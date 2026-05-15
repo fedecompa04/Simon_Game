@@ -31,21 +31,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.compagnofederico.simon.R
 import com.compagnofederico.simon.components.GameViewModel
-import com.compagnofederico.simon.database.Match
 
 /**
  * Screen displaying the history of all games played.
  * @param history List of strings representing game sequences.
  */
 @Composable
-fun Screen2(viewModel: GameViewModel, onGameScreen: () -> Unit){
+fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit){
     // Carichiamo i dati all'avvio dello schermo
     LaunchedEffect(Unit) {
         viewModel.loadMatches()
@@ -57,7 +59,7 @@ fun Screen2(viewModel: GameViewModel, onGameScreen: () -> Unit){
     // so we follow the last match played
     val scrollState = rememberLazyListState()
     LaunchedEffect(history.size){
-        if(history.size > 0) {
+        if(history.isNotEmpty()) {
             scrollState.animateScrollToItem(history.size - 1)
         }
     }
@@ -132,17 +134,29 @@ private fun MatchResult(score: Int, game: String, errorPosition: Int){
                 fontWeight = FontWeight.Bold
             )
             // Shows the color sequence
-            val colors = game.split(", ")
-            colors.forEachIndexed { index, color ->
-                Text(
-                    text = color + (if(index < colors.size - 1) "," else ""),
-                    color = if(index >= errorPosition) Color.Red else Color.Black,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Text(
+                text = formatText(game, errorPosition),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
+}
+
+private fun formatText(s: String, errorPosition: Int): AnnotatedString{
+    val colors: List<String> = s.split(", ")
+    val correctPart = colors.take(errorPosition).joinToString(", ")
+    val wrongPart = colors.drop(errorPosition).joinToString(", ")
+    val formattedText = buildAnnotatedString {
+        append(correctPart)
+        if(correctPart.isNotEmpty() && wrongPart.isNotEmpty()){
+            append(", ")
+        }
+        withStyle(style = SpanStyle(color = Color.Red)){
+            append(wrongPart)
+        }
+    }
+    return formattedText
 }
 
 /**
