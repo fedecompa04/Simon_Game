@@ -10,4 +10,7 @@
     <string name="ongoing">Partita in corso</string>
     <string name="summary">RIEPILOGO PARTITE</string>
     <string name="content_desc_FAB">Nuova Partita</string>
+    <string name="detail_header">DETTAGLIO PARTITA</string>
+    <string name="detail_sequence">SEQUENZA:</string>
+    <string name="detail_score">PUNTEGGIO</string>
 </resources>

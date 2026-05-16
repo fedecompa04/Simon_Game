@@ -11,4 +11,7 @@
     <string name="ongoing">Match in progress</string>
     <string name="summary">MATCH SUMMARY</string>
     <string name="content_desc_FAB">New Match</string>
+    <string name="detail_header">MATCH DETAIL</string>
+    <string name="detail_sequence">SEQUENCE:</string>
+    <string name="detail_score">SCORE</string>
 </resources>

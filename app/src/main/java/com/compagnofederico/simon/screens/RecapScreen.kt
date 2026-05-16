@@ -36,18 +36,21 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.compagnofederico.simon.R
 import com.compagnofederico.simon.components.GameViewModel
+import com.compagnofederico.simon.components.formatText
+import com.compagnofederico.simon.database.Match
 
 /**
  * Screen displaying the history of all games played.
  * @param history List of strings representing game sequences.
  */
 @Composable
-fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit){
+fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScreen: (Match) -> Unit){
     // Carichiamo i dati all'avvio dello schermo
     LaunchedEffect(Unit) {
         viewModel.loadMatches()
@@ -80,7 +83,10 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit){
                 fontFamily = FontFamily.Monospace,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.ExtraBold,
-                modifier = Modifier.padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
             )
             // Scrollable list that displays the history of the played matches
             LazyColumn(
@@ -92,7 +98,12 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit){
             ) {
                 // Display completed matches
                 items(history) { match ->
-                    MatchResult(match.score, match.sequence, match.errorPosition)
+                    MatchResult(
+                        match.score,
+                        match.sequence,
+                        match.errorPosition,
+                        onClick = { onDetailScreen(match) }
+                    )
                 }
             }
         }
@@ -113,10 +124,10 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit){
  * @param game String representation of the color sequence.
  */
 @Composable
-private fun MatchResult(score: Int, game: String, errorPosition: Int){
+private fun MatchResult(score: Int, game: String, errorPosition: Int, onClick: () -> Unit){
     Surface(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
+        onClick = onClick,
         // Active games are highlighted with an orange color
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = MaterialTheme.shapes.medium
@@ -143,21 +154,6 @@ private fun MatchResult(score: Int, game: String, errorPosition: Int){
     }
 }
 
-private fun formatText(s: String, errorPosition: Int): AnnotatedString{
-    val colors: List<String> = s.split(", ")
-    val correctPart = colors.take(errorPosition).joinToString(", ")
-    val wrongPart = colors.drop(errorPosition).joinToString(", ")
-    val formattedText = buildAnnotatedString {
-        append(correctPart)
-        if(correctPart.isNotEmpty() && wrongPart.isNotEmpty()){
-            append(", ")
-        }
-        withStyle(style = SpanStyle(color = Color.Red)){
-            append(wrongPart)
-        }
-    }
-    return formattedText
-}
 
 /**
  * Helper function to calculate the number of letters in the string that represents the number of

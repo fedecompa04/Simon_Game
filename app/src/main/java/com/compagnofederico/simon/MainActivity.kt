@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.compagnofederico.simon.components.GameViewModel
+import com.compagnofederico.simon.screens.DetailScreen
 import com.compagnofederico.simon.screens.GameScreen
 import com.compagnofederico.simon.screens.RecapScreen
 import com.compagnofederico.simon.ui.theme.SimonTheme
@@ -58,6 +59,10 @@ class MainActivity : ComponentActivity() {
                                 viewModel = gameViewModel,
                                 onGameScreen = {
                                     navController.navigate("GameScreen")
+                                },
+                                onDetailScreen = { match ->
+                                    gameViewModel.selectMatch(match)
+                                    navController.navigate("DetailScreen")
                                 }
                             )
                         }
@@ -69,6 +74,12 @@ class MainActivity : ComponentActivity() {
                                     gameViewModel.onEndGame()
                                 }
                             )
+                        }
+                        composable(route = "DetailScreen") {
+                            val match = gameViewModel.selectedMatch
+                            if (match != null) {
+                                DetailScreen(match = match)
+                            }
                         }
                     }
 

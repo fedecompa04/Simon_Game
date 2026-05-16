@@ -26,6 +26,7 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     var isGameOver by mutableStateOf(false)
     var isGameStarted by mutableStateOf(false)
     var isPaused by mutableStateOf(false)
+    var selectedMatch by mutableStateOf<Match?>(null)
     private var playJob: Job? = null
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
     private val soundHelper: SoundHelper = SoundHelper(application)
@@ -33,6 +34,9 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private val matchDao = db.matchDao()
     val matchHistory = mutableStateOf<List<Match>>(emptyList())
 
+    fun selectMatch(match: Match) {
+        selectedMatch = match
+    }
     fun togglePause(){
         if(isComputerPlaying){
             isPaused = !isPaused
