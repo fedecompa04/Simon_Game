@@ -49,7 +49,7 @@ fun DetailScreen(match: Match){
         ){
             Header()
             Spacer(modifier = Modifier.height(28.dp))
-            Score(match)
+            Score(match, isLandscape)
             Spacer(modifier = Modifier.height(48.dp))
             GameSequence(match)
         }
@@ -65,7 +65,7 @@ fun DetailScreen(match: Match){
                     .weight(1f) // Prende metà spazio
             ) {
                 Header()
-                Score(match)
+                Score(match, isLandscape)
             }
             Column(
                 modifier = Modifier
@@ -94,11 +94,11 @@ fun Header(){
 }
 
 @Composable
-private fun Score(match: Match) {
+private fun Score(match: Match, isLandscape: Boolean) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 24.dp),
+            .padding(vertical = if (isLandscape) 4.dp else 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
