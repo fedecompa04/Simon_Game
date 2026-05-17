@@ -54,8 +54,8 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration
     val orientation = LocalConfiguration.current
-    LaunchedEffect(viewModel.isGameOver, viewModel.isComputerPlaying) {
-        if (viewModel.isComputerPlaying || viewModel.isGameOver) {
+    LaunchedEffect(viewModel.isGameStarted, viewModel.isComputerPlaying) {
+        if (viewModel.isComputerPlaying || !viewModel.isGameStarted) {
             sequence.clear()    // GESTIRE SALVATAGGIO SU DATABASE
         }
     }
@@ -74,7 +74,7 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 onColorClick = { color->
                     sequence.add(color)
                     viewModel.onUserClick(color) },
-                viewModel.isComputerPlaying,
+                viewModel.isUserClickable,
                 viewModel.highlightedColor,
                 viewModel.isGameStarted
             )
@@ -118,7 +118,7 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                     onColorClick = { color->
                         sequence.add(color)
                         viewModel.onUserClick(color) },
-                    viewModel.isComputerPlaying,
+                    viewModel.isUserClickable,
                     viewModel.highlightedColor,
                     viewModel.isGameStarted
                 )
@@ -161,7 +161,7 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
  * initial letter.
  */
 @Composable
-private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isComputerPlaying: Boolean,
+private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isUserClickable: Boolean,
                         highlightedColor: String?, isGameStarted: Boolean){
     val isHighlighted = colorItem.letter == highlightedColor
     val baseColor = when{
@@ -173,7 +173,7 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isCompu
             .padding(4.dp)
             .aspectRatio(4f/3f)
             .background(baseColor)
-            .clickable(enabled = isGameStarted && !isComputerPlaying) { // Disabilitiamo il click durante il turno del PC
+            .clickable(enabled = isGameStarted && isUserClickable) { // Disabilitiamo il click durante il turno del PC
                 onClick(colorItem.letter)
             }
             .border(
@@ -188,7 +188,7 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isCompu
  * @param onColorClick Callback function invoked when any color button in the grid is clicked.
  */
 @Composable
-private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean,
+private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
                       highlightedColor: String?, isGameStarted: Boolean){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -198,7 +198,7 @@ private fun ColorGrid(onColorClick: (String) -> Unit, isComputerPlaying: Boolean
             ColorButton(
                 colorItem = colorItem,
                 onClick = onColorClick,
-                isComputerPlaying = isComputerPlaying,
+                isUserClickable = isUserClickable,
                 highlightedColor = highlightedColor,
                 isGameStarted = isGameStarted
             )

@@ -153,18 +153,3 @@ private fun MatchResult(score: Int, game: String, errorPosition: Int, onClick: (
         }
     }
 }
-
-
-/**
- * Helper function to calculate the number of letters in the string that represents the number of
- * colored buttons clicked.
- * @param s Sequence string.
- * @return Integer count of letters in the sequence.
- */
-private fun countChar(s: String): Int{
-    var count = 0
-    for(c in s){
-        if(c != ',' && c != ' ') count++
-    }
-    return count
-}

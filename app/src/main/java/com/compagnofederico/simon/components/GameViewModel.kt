@@ -23,9 +23,9 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private val playerSequence = mutableStateListOf<String>()
     var highlightedColor by mutableStateOf<String?>(null)
     var isComputerPlaying by mutableStateOf(false)
-    var isGameOver by mutableStateOf(false)
     var isGameStarted by mutableStateOf(false)
     var isPaused by mutableStateOf(false)
+    var isUserClickable by mutableStateOf(false)
     var selectedMatch by mutableStateOf<Match?>(null)
     private var playJob: Job? = null
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
@@ -43,7 +43,6 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
         }
     }
     fun startMatch(){
-        isGameOver = false
         isGameStarted = true
         computerSequence.clear()
         playerSequence.clear()
@@ -60,6 +59,7 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private fun playMatch(){
         playJob?.cancel()
         playJob = viewModelScope.launch{
+            isUserClickable = false
             isComputerPlaying = true
             delay(1000)
             for(color in computerSequence){
@@ -74,15 +74,16 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
                 delay(200)
             }
             isComputerPlaying = false
+            isUserClickable = true
         }
     }
 
     private fun gameEnded(){
         playJob?.cancel()
-        isGameOver = true
         isGameStarted = false
         isPaused = false
         isComputerPlaying = false
+        isUserClickable = false
         computerSequence.clear()
         playerSequence.clear()
         highlightedColor = null
@@ -98,19 +99,28 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     }
 
     fun onUserClick(color: String){
-        if(!isGameStarted || isComputerPlaying || isGameOver) return
-        playerSequence.add(color)
-        if(playerSequence[playerSequence.size - 1] == computerSequence[playerSequence.size - 1]){
-            if(playerSequence.size == computerSequence.size){
-                playJob?.cancel()
-                playJob = viewModelScope.launch{
+        if(!isGameStarted || isComputerPlaying || !isUserClickable) return
+        isUserClickable = false
+        playJob?.cancel()
+        playJob = viewModelScope.launch {
+            playerSequence.add(color)
+            highlightedColor = color
+            soundHelper.playSound(color)
+            delay(300)
+            highlightedColor = null
+            if (playerSequence[playerSequence.size - 1] == computerSequence[playerSequence.size - 1]) {
+                if (playerSequence.size == computerSequence.size) {
                     delay(500)
-                    if(isActive && isGameStarted) addNewColor()
+                    if (isActive && isGameStarted) {
+                        addNewColor()
+                    }
+                }else{
+                    isUserClickable = true
                 }
+            } else {
+                saveMatch(playerSequence.size - 1)
+                gameEnded()
             }
-        }else{
-            saveMatch(playerSequence.size - 1)
-            gameEnded()
         }
     }
     fun saveMatch(errorIndex: Int){
