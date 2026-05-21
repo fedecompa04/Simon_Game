@@ -26,6 +26,7 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     var isGameStarted by mutableStateOf(false)
     var isPaused by mutableStateOf(false)
     var isUserClickable by mutableStateOf(false)
+    var isLoadingMatches by mutableStateOf(true)
     var selectedMatch by mutableStateOf<Match?>(null)
     private var playJob: Job? = null
     private val simonColors = listOf("R", "G", "B", "M", "Y", "C")
@@ -134,9 +135,11 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     }
     fun loadMatches(){
         viewModelScope.launch(Dispatchers.IO){
+            isLoadingMatches = true
             val matches = matchDao.getAllMatches()
             withContext(Dispatchers.Main){
                 matchHistory.value = matches
+                isLoadingMatches = false
             }
         }
     }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -19,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -88,22 +90,37 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
                     .fillMaxWidth()
                     .padding(start = 20.dp, top = 24.dp, end = 20.dp, bottom = 12.dp)
             )
-            // Scrollable list that displays the history of the played matches
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                state = scrollState
-            ) {
-                // Display completed matches
-                items(history) { match ->
-                    MatchResult(
-                        match.score,
-                        match.sequence,
-                        match.errorPosition,
-                        onClick = { onDetailScreen(match) }
-                    )
+
+            when {
+                viewModel.isLoadingMatches -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        contentAlignment = Alignment.Center
+                        ){
+                            CircularProgressIndicator()
+                    }
+                }
+                history.isEmpty() -> {
+                    EmptyHistoryState(modifier = Modifier.weight(1f))
+                }
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        state = scrollState
+                    ) {
+                        items(history) { match ->
+                            MatchResult(
+                                match.score,
+                                match.sequence,
+                                match.errorPosition,
+                                onClick = { onDetailScreen(match) }
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -151,5 +168,34 @@ private fun MatchResult(score: Int, game: String, errorPosition: Int, onClick: (
                 overflow = TextOverflow.Ellipsis
             )
         }
+    }
+}
+
+@Composable
+fun EmptyHistoryState(modifier: Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = stringResource(R.string.empty_list1),
+            fontFamily = FontFamily.Monospace,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = Color.Gray,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = stringResource(R.string.empty_list2),
+            fontFamily = FontFamily.Monospace,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.Gray.copy(alpha = 0.7f),
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }

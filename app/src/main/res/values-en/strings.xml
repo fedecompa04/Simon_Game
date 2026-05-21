@@ -10,6 +10,8 @@
     <string name="starter">Press Start Game!</string>
     <string name="ongoing">Match in progress</string>
     <string name="summary">MATCH SUMMARY</string>
+    <string name="empty_list1">No match played</string>
+    <string name="empty_list2">Press the button below to start playing!</string>
     <string name="content_desc_FAB">New Match</string>
     <string name="detail_header">MATCH DETAIL</string>
     <string name="detail_sequence">SEQUENCE:</string>
