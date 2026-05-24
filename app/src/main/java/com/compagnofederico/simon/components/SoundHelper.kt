@@ -15,6 +15,7 @@ class SoundHelper(context: Context){
         soundMap["M"] = soundPool.load(context, R.raw.magenta, 1)
         soundMap["Y"] = soundPool.load(context, R.raw.yellow, 1)
         soundMap["C"] = soundPool.load(context, R.raw.cyan, 1)
+        soundMap["GAMEOVER"] = soundPool.load(context, R.raw.failure, 1)
     }
 
     fun playSound(colorLetter: String){

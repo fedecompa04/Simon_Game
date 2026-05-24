@@ -108,8 +108,8 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
             highlightedColor = color
             soundHelper.playSound(color)
             delay(300)
-            highlightedColor = null
             if (playerSequence[playerSequence.size - 1] == computerSequence[playerSequence.size - 1]) {
+                highlightedColor = null
                 if (playerSequence.size == computerSequence.size) {
                     delay(500)
                     if (isActive && isGameStarted) {
@@ -119,6 +119,9 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
                     isUserClickable = true
                 }
             } else {
+                soundHelper.playSound("GAMEOVER")
+                delay(1500)
+                highlightedColor = null
                 saveMatch(playerSequence.size - 1)
                 gameEnded()
             }
