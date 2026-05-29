@@ -8,6 +8,7 @@
     <string name="button_end">End Game</string>
     <string name="placeholder">Color sequence…</string>
     <string name="starter">Press Start Game!</string>
+    <string name="game_over">GAME OVER! Go back to start a new match.</string>
     <string name="ongoing">Match in progress</string>
     <string name="summary">MATCH SUMMARY</string>
     <string name="empty_list1">No match played</string>

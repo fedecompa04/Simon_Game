@@ -72,6 +72,7 @@ class MainActivity : ComponentActivity() {
                                 viewModel = gameViewModel,
                                 onEndGame = {
                                     gameViewModel.onEndGame()
+                                    navController.popBackStack()
                                 }
                             )
                         }

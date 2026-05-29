@@ -3,6 +3,7 @@
 package com.compagnofederico.simon.screens
 
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
@@ -72,9 +74,16 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration
     val orientation = LocalConfiguration.current
-    LaunchedEffect(viewModel.isGameStarted, viewModel.isComputerPlaying) {
-        if (viewModel.isComputerPlaying || !viewModel.isGameStarted) {
-            sequence.clear()    // GESTIRE SALVATAGGIO SU DATABASE
+    val isGameOver = !viewModel.isGameStarted && sequence.isNotEmpty()
+    BackHandler(enabled = viewModel.isGameStarted && !isGameOver) {
+        viewModel.onEndGame()
+        onEndGame(sequence)
+        sequence.clear()
+    }
+    LaunchedEffect(viewModel.isComputerPlaying) {
+        // Svuota la sequenza locale SOLO nell'istante in cui il computer prende il controllo e inizia a giocare
+        if (viewModel.isComputerPlaying) {
+            sequence.clear()
         }
     }
     // PORTRAIT MODE
@@ -94,11 +103,13 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                     viewModel.onUserClick(color) },
                 viewModel.isUserClickable,
                 viewModel.highlightedColor,
-                viewModel.isGameStarted
+                viewModel.isGameStarted,
+                isGameOver = isGameOver
             )
             Display(
                 if(viewModel.isComputerPlaying) emptyList() else sequence,
-                viewModel.isGameStarted
+                viewModel.isGameStarted,
+                isGameOver
             )
             ButtonArea(
                 onStart = {
@@ -114,7 +125,8 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                 },
                 viewModel.isComputerPlaying,
                 viewModel.isGameStarted,
-                viewModel.isPaused
+                viewModel.isPaused,
+                isGameOver
             )
         }
     // LANDSCAPE MODE
@@ -138,7 +150,8 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                         viewModel.onUserClick(color) },
                     viewModel.isUserClickable,
                     viewModel.highlightedColor,
-                    viewModel.isGameStarted
+                    viewModel.isGameStarted,
+                    isGameOver
                 )
             }
             Column(
@@ -149,7 +162,8 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
             ){
                 Display(
                     if(viewModel.isComputerPlaying) emptyList() else sequence,
-                    viewModel.isGameStarted
+                    viewModel.isGameStarted,
+                    isGameOver
                 )
                 ButtonArea(
                     onStart = {
@@ -165,7 +179,8 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
                     },
                     viewModel.isComputerPlaying,
                     viewModel.isGameStarted,
-                    viewModel.isPaused
+                    viewModel.isPaused,
+                    isGameOver
                 )
             }
         }
@@ -207,7 +222,7 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isUserC
  */
 @Composable
 private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
-                      highlightedColor: String?, isGameStarted: Boolean){
+                      highlightedColor: String?, isGameStarted: Boolean, isGameOver: Boolean){
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         userScrollEnabled = false
@@ -216,9 +231,9 @@ private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
             ColorButton(
                 colorItem = colorItem,
                 onClick = onColorClick,
-                isUserClickable = isUserClickable,
+                isUserClickable = isUserClickable && !isGameOver,
                 highlightedColor = highlightedColor,
-                isGameStarted = isGameStarted
+                isGameStarted = isGameStarted && !isGameOver
             )
         }
     }
@@ -229,18 +244,16 @@ private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
  * @param sequence List of color initials selected by the user.
  */
 @Composable
-private fun Display(sequence: List<String>, isGameStarted: Boolean){
+private fun Display(sequence: List<String>, isGameStarted: Boolean, isGameOver: Boolean){
     val placeholderText = stringResource(R.string.placeholder)
     val starterText = stringResource(R.string.starter)
-    val textShown = if (sequence.isEmpty()) {
-        if(isGameStarted) {
-            placeholderText
-        }else{
-            starterText
-        }
-    }else{
-        sequence.joinToString(", ")
+    val textShown = when {
+        isGameOver -> stringResource(R.string.game_over)
+        sequence.isEmpty() -> if (isGameStarted) placeholderText else starterText
+        else -> sequence.joinToString(", ")
     }
+
+
     // Auto-scroll logic: whenever the text updates, scroll to the bottom of the box
     val scrollState = rememberScrollState()
     LaunchedEffect(textShown){
@@ -260,7 +273,12 @@ private fun Display(sequence: List<String>, isGameStarted: Boolean){
         ){
             Text(
                 text = textShown,
-                color = if(sequence.isEmpty() && isGameStarted) Color.Gray else Color.Black
+                color = when {
+                    isGameOver -> Color.Red
+                    sequence.isEmpty() && isGameStarted -> Color.Gray
+                    else -> Color.Black
+                },
+                fontWeight = if (isGameOver) FontWeight.ExtraBold else FontWeight.Normal
             )
         }
     }
@@ -273,14 +291,14 @@ private fun Display(sequence: List<String>, isGameStarted: Boolean){
  */
 @Composable
 private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -> Unit,
-                       isComputerPlaying: Boolean, isGameStarted: Boolean, isPaused: Boolean){
+                       isComputerPlaying: Boolean, isGameStarted: Boolean, isPaused: Boolean, isGameOver: Boolean){
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ){
         Button(
             onClick = onStart,
-            enabled = !isGameStarted,
+            enabled = !isGameStarted && !isGameOver,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp) // Riduce il padding interno per far stare il testo
         ){
@@ -293,7 +311,7 @@ private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -
 
         Button(
             onClick = onPause,
-            enabled = isComputerPlaying,
+            enabled = isComputerPlaying && !isGameOver,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp)
         ){
@@ -310,7 +328,7 @@ private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -
 
         Button(
             onClick = onEndGame,
-            enabled = isGameStarted,
+            enabled = isGameStarted && !isGameOver,
             modifier = Modifier.weight(1f),
             contentPadding = PaddingValues(4.dp)
         ){

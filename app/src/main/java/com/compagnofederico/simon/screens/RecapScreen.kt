@@ -60,14 +60,6 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
 
     // Osserviamo la variabile matchHistory del ViewModel
     val history by viewModel.matchHistory
-    // Auto-scroll logic: whenever the list of sequences update its size the screen will auto-scroll
-    // so we follow the last match played
-    val scrollState = rememberLazyListState()
-    LaunchedEffect(history.size){
-        if(history.isNotEmpty()) {
-            scrollState.animateScrollToItem(history.size - 1)
-        }
-    }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -110,7 +102,6 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
                         modifier = Modifier.fillMaxWidth(),
                         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp),
-                        state = scrollState
                     ) {
                         items(history) { match ->
                             MatchResult(

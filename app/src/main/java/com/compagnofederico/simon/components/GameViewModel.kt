@@ -104,8 +104,6 @@ class GameViewModel(application: Application, private val savedStateHandle: Save
         isPaused = false
         isComputerPlaying = false
         isUserClickable = false
-        computerSequence.clear()
-        playerSequence.clear()
         highlightedColor = null
         savedStateHandle.remove<ArrayList<String>>("saved_computer_seq")
     }
@@ -140,10 +138,10 @@ class GameViewModel(application: Application, private val savedStateHandle: Save
                 }
             } else {
                 soundHelper.playSound("GAMEOVER")
-                delay(1500)
                 highlightedColor = null
                 saveMatch(playerSequence.size - 1)
-                gameEnded()
+                isGameStarted = false
+                savedStateHandle["saved_is_game_started"] = false
             }
         }
     }
