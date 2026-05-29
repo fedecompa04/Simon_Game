@@ -40,6 +40,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.compagnofederico.simon.components.ColorData
 import com.compagnofederico.simon.R
 import com.compagnofederico.simon.components.GameViewModel
@@ -50,6 +52,22 @@ import com.compagnofederico.simon.components.GameViewModel
  */
 @Composable
 fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
+    // --- METTI IN PAUSA AUTOMATICAMENTE SE L'APP VA IN BACKGROUND ---
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        // Se il computer stava giocando, forziamo la pausa
+        if (viewModel.isComputerPlaying && !viewModel.isPaused) {
+            viewModel.togglePause()
+        }
+    }
+
+    // --- RIPRENDI AUTOMATICAMENTE QUANDO L'UTENTE RIAPRE L'APP (Opzionale) ---
+    // Se preferisci che l'utente debba premere "Play" manualmente per riprendere,
+    // cancella pure questo blocco ON_START qui sotto.
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        if (viewModel.isGameStarted && viewModel.isPaused) {
+            viewModel.togglePause()
+        }
+    }
     // rememberSaveable: keeps the sequence state alive even during screen rotations
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration

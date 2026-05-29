@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.compagnofederico.simon.database.Match
 import com.compagnofederico.simon.database.MatchDao
@@ -18,12 +19,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.collections.emptyList
 
-class GameViewModel(application: Application): AndroidViewModel(application) {
-    private val computerSequence = mutableStateListOf<String>()
+class GameViewModel(application: Application, private val savedStateHandle: SavedStateHandle): AndroidViewModel(application) {
+    // private val computerSequence = mutableStateListOf<String>()
+
+    private val computerSequence = mutableStateListOf<String>().apply {
+        val savedSeq = savedStateHandle.get<ArrayList<String>>("saved_computer_seq")
+        if (savedSeq != null) {
+            addAll(savedSeq)
+        }
+    }
     private val playerSequence = mutableStateListOf<String>()
     var highlightedColor by mutableStateOf<String?>(null)
     var isComputerPlaying by mutableStateOf(false)
-    var isGameStarted by mutableStateOf(false)
+    // var isGameStarted by mutableStateOf(false)
+    var isGameStarted by mutableStateOf(savedStateHandle.get<Boolean>("saved_is_game_started") ?: false)
     var isPaused by mutableStateOf(false)
     var isUserClickable by mutableStateOf(false)
     var isLoadingMatches by mutableStateOf(true)
@@ -35,6 +44,12 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private val matchDao = db.matchDao()
     val matchHistory = mutableStateOf<List<Match>>(emptyList())
 
+    init {
+        // Se l'app è stata uccisa dal sistema (Caso B), riprendiamo la partita da dove si era interrotta
+        if (isGameStarted && computerSequence.isNotEmpty()) {
+            playMatch()
+        }
+    }
     fun selectMatch(match: Match) {
         selectedMatch = match
     }
@@ -45,15 +60,18 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     }
     fun startMatch(){
         isGameStarted = true
+        savedStateHandle["saved_is_game_started"] = true
         computerSequence.clear()
         playerSequence.clear()
         computerSequence.add(simonColors.random())
+        savedStateHandle["saved_computer_seq"] = ArrayList(computerSequence)
         playMatch()
     }
 
     private fun addNewColor(){
         computerSequence.add(simonColors.random())
         playerSequence.clear()
+        savedStateHandle["saved_computer_seq"] = ArrayList(computerSequence)
         playMatch()
     }
 
@@ -82,12 +100,14 @@ class GameViewModel(application: Application): AndroidViewModel(application) {
     private fun gameEnded(){
         playJob?.cancel()
         isGameStarted = false
+        savedStateHandle["saved_is_game_started"] = false
         isPaused = false
         isComputerPlaying = false
         isUserClickable = false
         computerSequence.clear()
         playerSequence.clear()
         highlightedColor = null
+        savedStateHandle.remove<ArrayList<String>>("saved_computer_seq")
     }
 
     fun onEndGame(){
