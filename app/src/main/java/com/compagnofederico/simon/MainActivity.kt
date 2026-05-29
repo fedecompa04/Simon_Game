@@ -12,9 +12,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
@@ -39,8 +36,6 @@ class MainActivity : ComponentActivity() {
         setContent{
             SimonTheme {
                 val navController = rememberNavController()
-                val gameHistory = rememberSaveable{ mutableStateListOf<String>() }
-                val sequenceString = rememberSaveable{mutableStateOf("")}
                 val gameViewModel: GameViewModel = viewModel()
                 Surface(
                     modifier = Modifier.fillMaxSize(),

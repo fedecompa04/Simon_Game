@@ -10,9 +10,6 @@ interface MatchDao{
     @Insert
     suspend fun insertMatch(match: Match)
 
-    @Delete
-    suspend fun deleteMatch(match: Match)
-
     @Query("SELECT * FROM ListOfGames ORDER BY id DESC")
     suspend fun getAllMatches(): List<Match>
 }

@@ -9,7 +9,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.compagnofederico.simon.database.Match
-import com.compagnofederico.simon.database.MatchDao
 import com.compagnofederico.simon.database.MatchDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
