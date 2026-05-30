@@ -34,6 +34,10 @@ import com.compagnofederico.simon.R
 import com.compagnofederico.simon.components.formatText
 import com.compagnofederico.simon.database.Match
 
+/**
+ * Overview layout component of game's details.
+ * @param match The match we want to see the details of
+ */
 @Composable
 fun DetailScreen(match: Match){
     val configuration = LocalConfiguration.current
@@ -77,6 +81,9 @@ fun DetailScreen(match: Match){
     }
 }
 
+/**
+ * Header of the DetailScreen
+ */
 @Composable
 fun Header(){
     Text(
@@ -91,6 +98,11 @@ fun Header(){
     )
 }
 
+/**
+ * Score of the match
+ * @param match The match we want to see the details of
+ * @param isLandscape Flag detecting the orientation of the device
+ */
 @Composable
 private fun Score(match: Match, isLandscape: Boolean) {
     Column(
@@ -114,6 +126,7 @@ private fun Score(match: Match, isLandscape: Boolean) {
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(200.dp)
+                // Draws a circle that contains our score
                 .drawBehind {
                     drawCircle(
                         color = Color(0xFF6200EE),
@@ -133,6 +146,10 @@ private fun Score(match: Match, isLandscape: Boolean) {
     }
 }
 
+/**
+ * Formatted game sequence that shows where the user has committed the error.
+ * @param match The match we want to see the details of
+ */
 @Composable
 private fun GameSequence(match: Match){
     Text(

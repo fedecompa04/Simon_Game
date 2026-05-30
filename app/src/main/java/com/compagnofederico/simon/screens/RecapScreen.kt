@@ -44,17 +44,19 @@ import com.compagnofederico.simon.database.Match
 
 /**
  * Screen displaying the history of all games played.
- * @param history List of strings representing game sequences.
+ * @param viewModel The ViewModel driving the game logic.
+ * @param onGameScreen Callback invoked to navigate to a new active match session.
+ * @param onDetailScreen Callback triggered with a selected Match reference to see its specific detail overview.
  */
 @Composable
 fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScreen: (Match) -> Unit){
-    // Carichiamo i dati all'avvio dello schermo
+    // We load the history of matches when we enter the composition lifecycle
     LaunchedEffect(Unit) {
         viewModel.loadMatches()
     }
 
-    // Osserviamo la variabile matchHistory del ViewModel
     val history by viewModel.matchHistory
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -79,6 +81,7 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
             )
 
             when {
+                // Shows a centered loading spinner while fetching data from the database
                 viewModel.isLoadingMatches -> {
                     Box(
                         modifier = Modifier
@@ -89,9 +92,11 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
                             CircularProgressIndicator()
                     }
                 }
+                // Displays a dedicated placeholder layout when no historical matches exist
                 history.isEmpty() -> {
                     EmptyHistoryState(modifier = Modifier.weight(1f))
                 }
+                // Shows the scrollable list of past game records
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxWidth(),
@@ -124,7 +129,10 @@ fun RecapScreen(viewModel: GameViewModel, onGameScreen: () -> Unit, onDetailScre
 
 /**
  * Component representing a single game result card.
- * @param game String representation of the color sequence.
+ * @param score The numerical score integer mapped out of the specific database entry.
+ * @param game The full comma-separated character sequence representation.
+ * @param errorPosition Pointer signaling the step where an error occurred.
+ * @param onClick Callback triggered when a component of the list is selected
  */
 @Composable
 private fun MatchResult(score: Int, game: String, errorPosition: Int, onClick: () -> Unit){
@@ -156,7 +164,10 @@ private fun MatchResult(score: Int, game: String, errorPosition: Int, onClick: (
         }
     }
 }
-
+/**
+ * Layout triggered exclusively when historical data collections is completely empty.
+ * @param modifier Includes the layout constraints passed where the function is invoked.
+ */
 @Composable
 fun EmptyHistoryState(modifier: Modifier) {
     Column(

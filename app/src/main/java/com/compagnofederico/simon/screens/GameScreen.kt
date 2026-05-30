@@ -51,41 +51,46 @@ import com.compagnofederico.simon.components.GameViewModel
 /**
  * Primary game screen where the user interacts with the Simon sequence.
  * @param onEndGame Callback function called when the game is finished, passing the recorded sequence.
+ * @param viewModel The ViewModel driving the game logic.
  */
 @Composable
 fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
-    // --- METTI IN PAUSA AUTOMATICAMENTE SE L'APP VA IN BACKGROUND ---
+
+    // Automatically pauses the sequence playback if the application goes to the background
     LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
-        // Se il computer stava giocando, forziamo la pausa
         if (viewModel.isComputerPlaying && !viewModel.isPaused) {
             viewModel.togglePause()
         }
     }
 
-    // --- RIPRENDI AUTOMATICAMENTE QUANDO L'UTENTE RIAPRE L'APP (Opzionale) ---
-    // Se preferisci che l'utente debba premere "Play" manualmente per riprendere,
-    // cancella pure questo blocco ON_START qui sotto.
+    // Automatically resumes the sequence playback when the application returns to the foreground
     LifecycleEventEffect(Lifecycle.Event.ON_START) {
         if (viewModel.isGameStarted && viewModel.isPaused) {
             viewModel.togglePause()
         }
     }
+
     // rememberSaveable: keeps the sequence state alive even during screen rotations
     val sequence = rememberSaveable{mutableStateListOf<String>()}
     // Get current device configuration
     val orientation = LocalConfiguration.current
     val isGameOver = !viewModel.isGameStarted && sequence.isNotEmpty()
+
+    // Intercepts the system back button to cleanly terminate the game session
     BackHandler(enabled = viewModel.isGameStarted && !isGameOver) {
         viewModel.onEndGame()
         onEndGame(sequence)
         sequence.clear()
     }
+
+    // Flushes the local user input sequence when the computer starts demonstrating a new turn
     LaunchedEffect(viewModel.isComputerPlaying) {
         // Svuota la sequenza locale SOLO nell'istante in cui il computer prende il controllo e inizia a giocare
         if (viewModel.isComputerPlaying) {
             sequence.clear()
         }
     }
+
     // PORTRAIT MODE
     if(orientation.orientation == Configuration.ORIENTATION_PORTRAIT){
         Column(
@@ -192,6 +197,9 @@ fun GameScreen(onEndGame: (List<String>) -> Unit, viewModel: GameViewModel) {
  * @param colorItem Data object containing the color value and the associated letter.
  * @param onClick Callback function invoked when a colored button is clicked, passing the color's
  * initial letter.
+ * @param isUserClickable Condition stating if clickability is available.
+ * @param highlightedColor The initial string identifier of the color currently active flashed.
+ * @param isGameStarted Condition stating if an active match lifecycle is operating.
  */
 @Composable
 private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isUserClickable: Boolean,
@@ -219,6 +227,10 @@ private fun ColorButton(colorItem: ColorData, onClick: (String) -> Unit, isUserC
 /**
  * A 3x2 grid of "ColorButton" displaying the six colors of the game.
  * @param onColorClick Callback function invoked when any color button in the grid is clicked.
+ * @param isUserClickable Condition stating if clickability is available.
+ * @param highlightedColor The initial string identifier of the color currently active flashed.
+ * @param isGameStarted Condition stating if an active match lifecycle is operating.
+ * @param isGameOver Condition stating if the match ended.
  */
 @Composable
 private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
@@ -242,6 +254,8 @@ private fun ColorGrid(onColorClick: (String) -> Unit, isUserClickable: Boolean,
 /**
  * A display area that shows the current sequence of the initials of the clicked colors.
  * @param sequence List of color initials selected by the user.
+ * @param isGameStarted Condition stating if an active match lifecycle is operating.
+ * @param isGameOver Condition stating if the match ended.
  */
 @Composable
 private fun Display(sequence: List<String>, isGameStarted: Boolean, isGameOver: Boolean){
@@ -285,9 +299,14 @@ private fun Display(sequence: List<String>, isGameStarted: Boolean, isGameOver: 
 }
 
 /**
- * Area containing "Clear" and "EndGame" buttons
- * @param onClear Callback function invoked when the user wants to reset the current sequence
- * @param onEndGame Callback function invoked when the user wants to finish the game and save the result
+ * Area containing "Start Game", "Pause" "EndGame" buttons
+ * @param onStart Starts a fresh game session.
+ * @param onPause Pauses the game, available only when the computer is playing
+ * @param onEndGame Terminates and logs data details into structural local databases.
+ * @param isComputerPlaying Flag stating when computer is playing.
+ * @param isGameStarted Condition stating if an active match lifecycle is operating.
+ * @param isPaused Condition stating if the game is paused.
+ * @param isGameOver  Condition stating if the match ended.
  */
 @Composable
 private fun ButtonArea(onStart: () -> Unit, onPause: () -> Unit, onEndGame: () -> Unit,
