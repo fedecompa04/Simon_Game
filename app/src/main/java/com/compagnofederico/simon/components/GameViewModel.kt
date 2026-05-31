@@ -126,7 +126,8 @@ class GameViewModel(application: Application, private val savedStateHandle: Save
     // Stops an active match session and saves results if the criteria are met
     fun onEndGame(){
         if(isGameStarted){
-            if(computerSequence.size > 1){
+            val isFirstSequence = computerSequence.size == 1 && !isUserClickable
+            if(!isFirstSequence){
                 saveMatch(playerSequence.size)
             }
             gameEnded()
