@@ -1,3 +1,5 @@
+// Compagno Federico 2101752
+
 package com.compagnofederico.simon.screens
 
 import android.content.res.Configuration
