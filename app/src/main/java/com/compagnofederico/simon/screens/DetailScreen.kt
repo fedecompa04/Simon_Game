@@ -66,7 +66,7 @@ fun DetailScreen(match: Match){
         ) {
             Column(
                 modifier = Modifier
-                    .weight(1f) // Prende metà spazio
+                    .weight(1f)
             ) {
                 Header()
                 Score(match, isLandscape)
